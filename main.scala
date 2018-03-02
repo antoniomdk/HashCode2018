@@ -30,6 +30,8 @@ object HashCode {
   def weight2(car: Car, ride: Ride): Float =
     (distance(ride.start, ride.end) + ride.es) / (car.step + ((distance(car.pos, ride.start))))
 
+  def clamp0(x: Int): Int = if (x < 0) 0 else x
+
   @tailrec
   def algorithm(rides: Vector[Ride], vehicles: Vector[Car], car: Int): Vector[Car] = {
     val current = vehicles(car)
@@ -43,8 +45,7 @@ object HashCode {
       algorithm(rides, vehicles.updated(car, current.copy(canRide = false)), (car + 1) % vehicles.size)
     else {
       val ride = reallyValid.sortBy(weight2(current, _)).last
-      var wait = ride.es - current.step + distance(current.pos, ride.start)
-      if (wait < 0) wait = 0
+      val wait = clamp0(ride.es - current.step + distance(current.pos, ride.start))
       val nStep = current.step + distance(current.pos, ride.start) + wait
       val nCar = current.copy(pos = ride.end, step = nStep, rides = current.rides :+ ride)
       val nRides = rides.updated(ride.index, ride.copy(valid = false))
